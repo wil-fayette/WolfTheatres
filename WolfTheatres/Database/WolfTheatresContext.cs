@@ -1,8 +1,4 @@
 ﻿using System.Data.Entity;
-namespace WolfTheatres.Database
-{
-}
-
 
 namespace WolfTheatres.Database
 {
@@ -20,8 +16,13 @@ namespace WolfTheatres.Database
         public WolfTheatresContext()
             : base("name=WolfTheatresContext")
         {
+            System.Data.Entity.Database.SetInitializer<WolfTheatresContext>(null);
         }
 
         public DbSet<Movie> Movies { get; set; }
+
+        public DbSet<Employee> Employees { get; set; }
+
+        public DbSet<EmployeeShift> EmployeeShift { get; set; }
     }
 }

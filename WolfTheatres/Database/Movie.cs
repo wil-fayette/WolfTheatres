@@ -7,7 +7,7 @@ namespace WolfTheatres.Database
 {
     public class Movie
     {
-        public Guid Movieid { get; set; }
+        public Guid MovieId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string RunTime { get; set; }

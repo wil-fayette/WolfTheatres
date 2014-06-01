@@ -10,7 +10,7 @@ namespace WolfTheatres.Controllers
     {
         public ActionResult Index()
         {
-            return new FilePathResult("Index.html", "text/html");
+            return new FilePathResult("App/Index.html", "text/html");
         }
     }
 }

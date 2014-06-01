@@ -12,8 +12,6 @@ namespace WolfTheatres.Database
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-
-        public Guid EmployeeShiftId { get; set; }
-        public ICollection<EmployeeShift> EmployeeShifts { get; set; }
+        public virtual List<EmployeeShift> EmployeeShifts { get; set; }
     }
 }

@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html ng-app="WolfTheatresApp" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="/App/Scripts/jquery-2.1.1.js"></script>
+    <script src="/App/Scripts/bootstrap.js"></script>
+    <script src="/App/Scripts/angular.js"></script>
+    <script src="/App/Scripts/angular-resource.js"></script>
+    <script src="/App/Scripts/angular-route.js"></script>
+    <script src="/App/Scripts/app.js"></script>
+    <script src="/App/Controllers/controllers.js"></script>
+    <link rel="stylesheet" type="text/css" href="/App/Content/bootstrap.css" />
+    <title>Wolf Theatres</title>
+</head>
+<body>
+    <div class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header"><a class="navbar-brand" href="#/home">Wolf Theatres</a></div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav" ng-controller="NavigationController">
+                    <li ng-class="navClass('home')"><a href="#/home">Home</a></li>
+                    <li ng-class="navClass('employees')"><a href="#/employees">Employees</a></li>
+                    <li ng-class="navClass('showtimes')"><a href="#/showtimes">Showtimes</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div ng-view></div>
+    </div>
+</body>
+</html>
