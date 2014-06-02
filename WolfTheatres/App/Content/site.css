@@ -1,0 +1,50 @@
+﻿
+
+.top10 {
+    margin-top: 10px;
+}
+
+.left15{
+    margin-left: 15px;
+}
+
+.findMoviesResults {
+    height: 300px;
+    overflow: auto;
+    margin: 0px;
+   padding-left: 5px;
+
+}
+
+.findMovieResultImage {
+    height: 240px;
+    width: 166px;
+}
+
+.findMovieResultImage:hover {
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.findMovieResult {
+    list-style: none;
+}
+
+.findMovieResultMovieName {
+    position:absolute;
+    width:100%;
+    top:0;
+    background-color:rgba(255, 255, 255, 0.5);
+}
+
+.findMovieResultsContainer {
+    padding: 10px;
+    background-color: #333;
+    border-radius: 5px;
+}
+
+* {
+    outline: none;
+}
+
+
