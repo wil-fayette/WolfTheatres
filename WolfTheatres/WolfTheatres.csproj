@@ -161,12 +161,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App\Content\angular-snap.css" />
     <Content Include="App\Content\site.css" />
+    <Content Include="App\Content\animations.css" />
     <Content Include="App\Controllers\controllers.js" />
     <Content Include="App\index.html" />
+    <Content Include="App\Scripts\angular-snap.js" />
     <Content Include="App\Scripts\app.js" />
+    <Content Include="App\Scripts\jquery.slimscroll.js" />
+    <Content Include="App\Scripts\snap.js" />
     <Content Include="App\Views\employees.html" />
     <Content Include="App\Views\home.html" />
+    <Content Include="App\Views\movies.html" />
     <Content Include="App\Views\showtimes.html" />
     <Content Include="App\Content\bootstrap-theme.css" />
     <Content Include="App\Content\bootstrap-theme.min.css" />
@@ -177,7 +183,7 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="favicon.ico" />
-    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="App\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="App\Scripts\angular-animate.js" />
     <Content Include="App\Scripts\angular-animate.min.js" />
@@ -460,9 +466,9 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="App\Scripts\jquery-2.1.1.min.map" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="App\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="App\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="App\fonts\glyphicons-halflings-regular.eot" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App\Scripts\version.json" />

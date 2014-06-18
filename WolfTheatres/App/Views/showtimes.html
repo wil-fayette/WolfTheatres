@@ -1,53 +1,54 @@
 ﻿<div ng-controller="MoviesController">   
-    <accordion close-others="false">
-        <accordion-group heading="Find Movies" is-open="true">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="input-group">
-                        <input type="text" placeholder="Search for movies.." class="form-control" ng-model="search.$">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button">Search</button>
-                        </span>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <button type="button" class="btn btn-primary">
-                        Refresh
-                    </button>
-                </div>
-            </div>
+
+    <div class="row alertContainer">
+        <div class="col-lg-12">
+            <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)" class="phone-listing">{{alert.message}}</alert>
+        </div>
+    </div>
+
+
+  
+
 
             <div class="row">
-                    <hr />
-                    <div class="col-lg-8">
-                        <h4 class="left15">Search Results:</h4>
-                        <div class="findMovieResultsContainer">
+                <div class="col-lg-8">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Movie Search</h3>
+                        </div>
+                        <div class="input-group widgetOptions">
+                            <input type="text" placeholder="Search for movies.." class="form-control" ng-model="search.$">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">Search</button>
+                            </span>
+                        </div>
+
+                        <div class="widgetBody">
                             <ul id="findMovieResults" class="findMoviesResults">
-                                <li class="findMovieResult" ng-repeat="rottenMovie in rottenMovies  | filter:search">
-                                    <span ng-click="addMovie(rottenMovie)">{{rottenMovie.title}} ({{rottenMovie.year}}) </span>
+                                <li class="findMovieResult" ng-repeat="rottenMovie in rottenMovies  | filter:search | orderBy: 'title'">
+                                    <span ng-disabled="{{rottenMovie.isInOurMovies}}" ng-click="addMovie(rottenMovie)">{{rottenMovie.title}} ({{rottenMovie.year}}) </span>
                                 </li>
                             </ul>
                         </div>
+
                     </div>
-                    <div class="col-lg-4">
-                        <h4 class="left15">Our Movies:</h4>
-                        <div class="findMovieResultsContainer">
-                            <ul class="findMoviesResults">
+                </div>
+               
+                <div class="col-lg-4">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Our Movies</h3>
+                        </div>
+                        <div class="widgetBody">
+                            <ul class="ourMoviesResults">
                                 <li class="findMovieResult" ng-repeat="wolfMovie in wolfMovies">
                                     <span>{{wolfMovie.title}}</span>
                                 </li>
                             </ul>
                         </div>
-                    </div>
 
+
+                    </div>
+                </div>
             </div>
-        </accordion-group>
-        <accordion-group heading="Showtimes" is-open="true">
-            <p>The body of the accordion group grows to fit the contents</p>
-            <button class="btn btn-default btn-sm">Add Item</button>
-        </accordion-group>
-        <accordion-group heading="Schedule" is-open="true">
-            This is just some content to illustrate fancy headings.
-        </accordion-group>
-    </accordion>
 </div>
