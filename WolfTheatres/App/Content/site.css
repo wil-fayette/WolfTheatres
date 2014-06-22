@@ -103,15 +103,28 @@ border-bottom: 1px solid #1a1c20;
   border-radius: 50%;
 }
 
+.moviePoster {
+    background-color: #f1f1f1;
+    height: 185px;
+    border-radius: 3px;
+        width: 125px;
+}
+
+.moviePoster img {
+    height: 185px;
+    width: 125px;
+    border-radius: 3px;
+}
+
 .widget {
     overflow: hidden;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.13);
-    border-radius: 0px;
+    border-radius: 3px;
 }
 
 .widgetContent {
     overflow: hidden;
-    height: 790px;
+    height: 786px;
     padding: 15px;
 }
 
@@ -120,8 +133,13 @@ border-bottom: 1px solid #1a1c20;
 }
 
 .widgetHeaderButton {
-    top: -16px;
     color: #29599B;
+    font-size: 17px;
+    line-height: 36px;
+    height: 36px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-left: 1px solid #eee;
 }
 
 .widgetOptions {
@@ -170,15 +188,30 @@ color: #29599B;
     border: none !important;
 }
 
+
+
 .ourMovies {
         /*max-height: 347px;*/
 }
 
 .panel-heading {
-    overflow: hidden;
-    border-radius: 0px;
-    height: 35px;
-    background-color: #f5f5f5 !important;
+overflow: hidden;
+border-radius: 0px;
+height: 37px;
+background-color: #f9f9f9!important;
+border-bottom: 1px solid #f1f1f1;
+padding: 0px;
+}
+
+.panel-heading h2 {
+    float: left;
+    line-height: 37px;
+height: 37px;
+padding-left: 15px;
+}
+
+.widgetHeaderToolbar {
+    float: right;
 }
 
 .total {
@@ -198,10 +231,17 @@ color: #29599B;
 
 .movieInformation input, textarea {
     border: none;
+    color: #888;
 }
 
 .movieInformation input {
     min-width: 200px;
+    background-color: #f9f9f9;
+}
+
+.movieInformation textarea {
+    border: none;
+    background-color: #f9f9f9;
 }
 
 .movieInformation .list-group {
@@ -232,10 +272,10 @@ color: #29599B;
 
 .movieInformation textarea {
   width: 100%;
-min-height: 235px;
 resize: none;
 margin-top: 15px;
 margin-bottom: 0px;
+color: #777;
 }
 
 .movieCalendar .btn-sm {
@@ -248,4 +288,31 @@ margin-bottom: 0px;
 
 .movieCalendar table th {
     padding-bottom: 10px;
+}
+
+.ourMovies table td button {
+ float: right;
+border: 0px;
+background-color: inherit;
+padding: 0px;
+}
+
+#movieCast {
+    min-height: 50px;
+}
+
+#movieDescription {
+    min-height: 235px;
+}
+
+.imagePlaceholder {
+    position: relative;
+    left: 36px;
+    top: 70px;
+    font-size: 30px;
+    color: #ddd;
+}
+
+.movieInformation .tab-content {
+    margin-top: 25px;
 }

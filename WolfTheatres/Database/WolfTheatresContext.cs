@@ -20,9 +20,17 @@ namespace WolfTheatres.Database
         }
 
         public DbSet<Movie> Movies { get; set; }
-
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<EmployeeShift> EmployeeShifts { get; set; }
+        public DbSet<Poster> Posters { get; set; }
 
-        public DbSet<EmployeeShift> EmployeeShift { get; set; }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Movie>()  // The entity being configured is Address
+                   .HasOptional(x => x.Poster)
+                   .WithOptionalPrincipal()
+                   .Map(map => map.MapKey("MovieId"))
+                   .WillCascadeOnDelete();
+        }
     }
 }

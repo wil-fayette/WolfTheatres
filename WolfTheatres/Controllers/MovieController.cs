@@ -10,10 +10,14 @@ using System.Web;
 using System.Web.Http;
 using WolfTheatres.Database;
 
+
 namespace WolfTheatres.Controllers
 {
     public class MovieController : ApiController
     {
+        private const string POSTER_IMG_LOCATION_PROJECT = "~/Movies/Posters/";
+        private const string POSTER_IMG_LOCATION_WEB = "Movies/Posters/";
+
         private WolfTheatresContext db = new WolfTheatresContext();
 
         // GET api/Movie
@@ -23,7 +27,7 @@ namespace WolfTheatres.Controllers
         }
 
         // GET api/Movie/5
-        public Movie GetMovie(Guid id)
+        public Movie GetMovie(int id)
         {
             Movie movie = db.Movies.Find(id);
             if (movie == null)
@@ -35,7 +39,7 @@ namespace WolfTheatres.Controllers
         }
 
         // PUT api/Movie/5
-        public HttpResponseMessage PutMovie(Guid id, Movie movie)
+        public HttpResponseMessage PutMovie(int id, Movie movie)
         {
             if (!ModelState.IsValid)
             {
@@ -79,15 +83,51 @@ namespace WolfTheatres.Controllers
             }
         }
 
+        public int PostMovies(IEnumerable<Movie> movies)
+        {
+            if (ModelState.IsValid)
+            {
+                foreach (var movie in movies)
+                {
+                    if (db.Movies.Find(movie.MovieId) == null)
+                    {
+                        movie.Poster.PosterId = Guid.NewGuid();
+
+                        
+                        var webClient = new WebClient();
+
+                        webClient.DownloadFile(movie.Poster.ImageUrl, HttpContext.Current.Server.MapPath(POSTER_IMG_LOCATION_PROJECT) + movie.MovieId + ".png");
+
+                        movie.Poster.FileLocation = POSTER_IMG_LOCATION_WEB + movie.MovieId + ".png";
+
+                        db.Movies.Add(movie);
+                    }   
+                }
+                
+                db.SaveChanges();
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         // DELETE api/Movie/5
-        public HttpResponseMessage DeleteMovie(Guid id)
+        public HttpResponseMessage DeleteMovie(int id)
         {
             Movie movie = db.Movies.Find(id);
             if (movie == null)
             {
                 return Request.CreateResponse(HttpStatusCode.NotFound);
             }
-
+            if (movie.Poster != null)
+            {
+                    var databasePoster = db.Posters.Find(movie.Poster.PosterId);
+                    if (databasePoster != null)
+                        db.Posters.Remove(databasePoster);
+                
+            }
             db.Movies.Remove(movie);
 
             try

@@ -66,6 +66,6 @@ C:\Development\WolfTheatres\WolfTheatres\bin\ko\System.Spatial.resources.dll
 C:\Development\WolfTheatres\WolfTheatres\bin\ru\System.Spatial.resources.dll
 C:\Development\WolfTheatres\WolfTheatres\bin\zh-Hans\System.Spatial.resources.dll
 C:\Development\WolfTheatres\WolfTheatres\bin\zh-Hant\System.Spatial.resources.dll
-C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.csprojResolveAssemblyReference.cache
 C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.dll
 C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.pdb
+C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.csprojResolveAssemblyReference.cache
