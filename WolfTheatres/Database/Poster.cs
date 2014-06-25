@@ -10,7 +10,9 @@ namespace WolfTheatres.Database
     public class Poster
     {
         public Guid PosterId { get; set; }
+        public bool Display { get; set; }
         public string ImageUrl { get; set; }
         public string FileLocation { get; set; }
+        public int MovieId { get; set; }
     }
 }

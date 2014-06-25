@@ -6,10 +6,25 @@
         otherwise({ redirectTo: '/' });
 });
 
+WolfTheatresApp.directive('fileStyle', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            debugger;
+            $(element).addClass('fileStyle');
+            $(element).filestyle({ buttonText: "Add Poster" });
+        }
+    };
+});
+
 WolfTheatresApp.service('wolfMovieConverter', function () {
     this.convertIntoWolfMovie = function (movie) {
-        debugger;
+        
 
+        if (movie.alternate_ids) {
+            imdbId = movie.alternate_ids.imdb;
+        }
+     
         var wolfMovie = {
             MovieId: movie.id,
             Name: movie.title,
@@ -18,12 +33,20 @@ WolfTheatresApp.service('wolfMovieConverter', function () {
             Rating: movie.mpaa_rating,
             Year: movie.year,
             Cast: "",
-            Poster: {
+            ImdbId: imdbId,
+            Posters: [{
+                Display: 1,
                 ImageUrl: movie.posters.detailed,
                 FileLocation: "",
                 MovieId: movie.id
-            }
+            }],
+            Trailers: [{
+                Display: 0,
+                TrailerUrl: "",
+                MovieId: movie.id
+            }]
         }
+        debugger;
 
         for (var i = 0; i < movie.abridged_cast.length; i++) {
             if (i == (movie.abridged_cast.length - 1)){
@@ -46,7 +69,22 @@ WolfTheatresApp.service('wolfMovieConverter', function () {
     }
 });
 WolfTheatresApp.service('rottenMovieService', function ($http, wolfMovieConverter) {
-    var apiKey = 'pup7g2wafuxya22ryzfvyung';
+    var apiKey = '2n73mdr22zfk7exg5gysaccj';
+
+    this.searchForMovie = function(search, callback) {
+        $http.jsonp('http://api.rottentomatoes.com/api/public/v1.0/movies.json', {
+            params: {
+                q: search,
+                apikey: apiKey,
+                page_limit: 10,
+                page: 1,
+                callback: 'JSON_CALLBACK'
+            }
+        }).success(function (data) {
+            debugger;
+            callback(wolfMovieConverter.convertIntoWolfMovies(data.movies));
+        });
+    }
 
     this.getBoxOfficeMovies = function (callback) {
         $http.jsonp('http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json', {
@@ -107,12 +145,24 @@ WolfTheatresApp.factory('wolfMovieService', function ($http) {
 
     wolfMovieService.saveWolfMovies = function (movies, callback) {
         $http.post('api/Movie/PostMovies', movies).success(function (data) {
-            return data;
+            callback(data);
+        });
+    }
+
+    wolfMovieService.saveWolfMovie = function (movie, callback) {
+        $http.post('api/Movie/PostMovie', movie).success(function (data) {
+            callback(data);
         });
     }
 
     wolfMovieService.deleteWolfMovie = function (movieId, callback) {
         $http.delete('api/Movie/DeleteMovie/' + movieId).success(function (data) {
+            return data;
+        });
+    }
+
+    wolfMovieService.saveMoviePosters = function (posters, callback) {
+        $http.post('api/Movie/SaveMoviePosters', posters).success(function (data) {
             return data;
         });
     }
@@ -146,20 +196,33 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
         var inArray = false;
 
         for (var i = 0; i < $scope.wolfMovies.length; i++) {
-            if ($scope.wolfMovies[i] == movie) {
+            if ($scope.wolfMovies[i].MovieId == movie.MovieId) {
                 inArray = true;
             }
         }
 
-        var indexOfMovie = $scope.rottenMovies.indexOf(movie);
-        if (indexOfMovie != -1) {
-            $scope.rottenMovies.splice(indexOfMovie, 1);
-        }
+        if (!inArray) {
+            debugger;
+            var indexOfMovie = $scope.rottenMovies.indexOf(movie);
+            if (indexOfMovie != -1) {
+                $scope.rottenMovies.splice(indexOfMovie, 1);
+            }
 
-        if (inArray != true) {
-            $scope.wolfMovies.push(movie);
+            wolfMovieService.saveWolfMovie(movie, function (returnedMovie) {
+                $scope.wolfMovies.push(returnedMovie);
+                $scope.$apply();
+            });
         }
     }
+
+    function updateMovie(movie) {
+        wolfMovieService.saveWolfMovie(movie, function (returnedMovie) {
+            $scope.selectedMovie = returnedMovie;
+            $scope.$apply();
+        });
+    }
+
+    $scope.updateMovie = updateMovie;
 
     function selectMovie(movie) {
         if ($scope.selectedMovie == movie) {
@@ -177,41 +240,82 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
 
     $scope.addMovie = addMovie;
     
-    rottenMovieService.getInTheatresMovies(function (inTheatresMovies) {
-        var movies = [];
-
-        movies = inTheatresMovies;
-        rottenMovieService.getOpeningMovies(function (openingMovies) {
-            $scope.rottenMovies = movies.concat(openingMovies);
-        });
-    });
-
     $scope.date = new Date();
-    //TODO
-    //call out to webapi and populate wolfMovies with movies in our database
 
     wolfMovieService.getWolfMovies(function (data) {
         $scope.wolfMovies = data;
     });
 
-
     function saveWolfMovies() {
         wolfMovieService.saveWolfMovies($scope.wolfMovies, function (data) {
-            console.log(data);
+            if (data == 1) {
+                wolfMovieService.getWolfMovies(function (data) {
+                    $scope.wolfMovies = data;
+                });
+            }
+        });
+    }
+
+    function searchForMovie(search) {
+        rottenMovieService.searchForMovie(search, function (data) {
+            $scope.rottenMovies = data;
+            $($("#rottenMovieSearch")).val("");
         });
     }
     
+
+    $scope.searchForMovie = searchForMovie;
+
     function deleteWolfMovie(movieId) {
-        debugger;
         removeMovieById(movieId, $scope.wolfMovies);
         wolfMovieService.deleteWolfMovie(movieId, function (data) {
             console.log(data);
+            $scope.$apply();
         });
     }
 
-    $scope.deleteWolfMovie = deleteWolfMovie;
+    function uploadPoster(poster, movie) {
+        debugger;
 
+        if ($('#' + poster).get(0) != null) {
+            var files = $('#' + poster).get(0).files;
+
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (i = 0; i < files.length; i++) {
+                        data.append("file" + i, files[i]);
+                    }
+
+                    data.append("movieId", movie.MovieId);
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/Poster/Post",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (results) {
+                            for (var i = 0; i < results.length; i++) {
+                                $scope.selectedMovie.Posters.push(results[i]);
+                                $scope.$apply();
+                            }
+                        }
+                    });
+                } else {
+                    alert("This browser doesn't support HTML5 multiple file uploads!");
+                }
+            }
+        }
+    }
+
+    $scope.deleteWolfMovie = deleteWolfMovie;
     $scope.saveWolfMovies = saveWolfMovies;
+    $scope.uploadPoster = uploadPoster;
+
+    rottenMovieService.getUpcomingMovies(function (movies) {
+        $scope.rottenMovies = movies;
+    });
 
 }).controller('ShowtimesController', function ($scope) {
 

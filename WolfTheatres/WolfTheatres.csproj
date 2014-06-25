@@ -150,12 +150,14 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
+    <Compile Include="Controllers\PosterController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MovieController.cs" />
     <Compile Include="Database\Employee.cs" />
     <Compile Include="Database\EmployeeShift.cs" />
     <Compile Include="Database\Movie.cs" />
     <Compile Include="Database\Poster.cs" />
+    <Compile Include="Database\Trailer.cs" />
     <Compile Include="Database\WolfTheatresContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -170,6 +172,7 @@
     <Content Include="App\index.html" />
     <Content Include="App\Scripts\angular-snap.js" />
     <Content Include="App\Scripts\app.js" />
+    <Content Include="App\Scripts\bootstrap-filestyle.min.js" />
     <Content Include="App\Scripts\jquery.slimscroll.js" />
     <Content Include="App\Scripts\snap.js" />
     <Content Include="App\Views\employees.html" />
