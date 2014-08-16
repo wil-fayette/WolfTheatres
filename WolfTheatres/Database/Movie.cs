@@ -9,9 +9,14 @@ namespace WolfTheatres.Database
 {
     public class Movie
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int MovieId { get; set; }
-        public int ImdbId { get; set; }
+        public Movie()
+        {
+            this.MovieId = Guid.NewGuid();
+        }
+
+        public Guid MovieId { get; set; }
+        public int MovieDbId { get; set; }
+        public string ImdbId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string RunTime { get; set; }
@@ -20,5 +25,46 @@ namespace WolfTheatres.Database
         public string Cast { get; set; }
         public virtual List<Poster> Posters { get; set; }
         public virtual List<Trailer> Trailers { get; set; }
+        public virtual List<MovieShowtime> MovieShowtimes { get; set; }
+
+        public void GetMovieInformationFromJson(Newtonsoft.Json.Linq.JToken movieInformation)
+        {
+            this.MovieDbId = (int)movieInformation["id"];
+            this.ImdbId = (string)movieInformation["imdb_id"];
+            this.Name = (string)movieInformation["title"];
+            this.Description = (string)movieInformation["overview"];
+            this.RunTime = (string)movieInformation["runtime"];
+            this.Rating = (string)movieInformation["releases"]["countries"][0]["certification"];
+            this.Year = (string)movieInformation["release_date"];
+
+
+            var imageUrl = "";
+
+            if (!string.IsNullOrEmpty(movieInformation["poster_path"].ToString()))
+                imageUrl = "http://image.tmdb.org/t/p/original" + movieInformation["poster_path"];
+
+
+            this.Posters = new List<Poster>{
+                new Poster {
+                    PosterId = Guid.NewGuid(),
+                    Display = true,
+                    ImageUrl =  imageUrl,
+                    MovieId = this.MovieId
+                }
+           };
+
+            this.Trailers = new List<Trailer>();
+
+            foreach (var trailer in movieInformation["videos"]["results"])
+            {
+                this.Trailers.Add(new Trailer
+                {
+                    TrailerId = Guid.NewGuid(),
+                    Display = true,
+                    TrailerUrl = "http://www.youtube.com/v/" + trailer["key"],
+                    MovieId = this.MovieId
+                });
+            }
+        }
     }
-}
+}    

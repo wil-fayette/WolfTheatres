@@ -1,0 +1,318 @@
+﻿<div ng-controller="MovieInformationController">
+
+    <script type="text/ng-template" id="trailerModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Trailer:</h3>
+        </div>
+        <div class="modal-body">
+            <iframe width="560" height="315" ng-src="{{trustSrc(trailer)}}" webkitallowfullscreen="true" mozallowfullscreen="true" scrolling="no"></iframe>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="select()">Select</button>
+            <button class="btn btn-primary" ng-click="unSelect()">De-Select</button>
+
+            <button class="btn btn-warning" ng-click="cancel()">Close</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="editMovieModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Movie</h3>
+        </div>
+        <div class="modal-body">
+            <tabset justified="true">
+                <tab heading="Basic">
+                    <form role="form" id="movieBasicInformationForm" class="movieInformation">
+                        <div class="form-group">
+                            <label for="movieName">Name</label>
+                            <input type="text" class="form-control" id="movieName" ng-model="object.Name" name="Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="movieRating">Rating</label>
+                            <input type="text" class="form-control" id="movieRating" ng-model="object.Rating" name="Rating">
+                        </div>
+                        <div class="form-group">
+                            <label for="movieRuntime">Runtime</label>
+                            <input type="text" class="form-control" id="movieRuntime" ng-model="object.RunTime" name="RunTime">
+                        </div>
+                        <div class="form-group">
+                            <label for="movieYear">Year</label>
+                            <input type="text" class="form-control" id="movieYear" ng-model="object.Year" name="Year">
+                        </div>
+                        <div class="form-group">
+                            <label for="movieDescription">Description</label>
+                            <textarea class="form-control" id="movieDescription" ng-model="object.Description" name="Description"></textarea>
+                        </div>
+                    </form>
+                </tab>
+                <tab heading="Posters">
+
+                        <br />
+                        <br />
+
+                        <table class="table">
+                            <thead class="tableHeader">
+                            <th>Poster</th>
+                            <th>Actions</th>
+                            </thead>
+                            <tr ng-repeat="poster in object.Posters">
+                                <td class="moviePoster">
+                                    <span ng-show="poster.Display" class="glyphicon glyphicon-check selectedPoster"></span>
+                                    <img ng-src="{{poster.FileLocation}}" />          
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-xs" ng-model="poster.Display" ng-click="poster.Display = !poster.Display" ng-show="poster.Display">Hide</button>
+                                    <button type="button" class="btn btn-default btn-xs" ng-model="poster.Display" ng-click="poster.Display = !poster.Display" ng-show="!poster.Display">Show</button>
+                                    <button type="button" class="btn btn-default btn-xs" ng-click="deletePoster(poster)">Delete</button>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <br/>
+                        <br/>
+
+                        <div>
+                        <form role="form" id=" movieposterform" enctype="multipart/form-data">
+                            <div class="form-group editMovieButtons">
+                                <input id="customMoviePoster" class="form-control" name="customMoviePoster" type="file" file-style="" />
+                            </div>
+                            <button class="btn btn-default" ng-click="uploadPoster('customMoviePoster', object)">Add</button>
+                        </form>
+                       </div>
+                                        
+                </tab>
+                <tab heading="Trailers">
+
+                    <br />
+                    <br />
+           
+                    <div class="widgetMessage" ng-show="selectedMovie.Trailers.length == 0">This movie does not have any trailers.</div>
+
+                    <table class="table">
+                        <thead class="tableHeader">
+                            <th>Trailer</th>
+                            <th>Actions</th>
+                        </thead>
+                        <tr ng-repeat="trailer in object.Trailers">
+                            <td style="position: relative;">
+                                <span ng-show="trailer.Display" class="glyphicon glyphicon-check selectedTrailer"></span>
+                                <iframe width="250" height="250" ng-src="{{trustSrc(trailer.TrailerUrl)}}" webkitallowfullscreen="true" mozallowfullscreen="true" scrolling="no"></iframe></td>
+                            <td>
+                                <button type="button" class="btn btn-default btn-xs" ng-model="trailer.Display" ng-click="trailer.Display = !trailer.Display" ng-show="trailer.Display">Hide</button>
+                                <button type="button" class="btn btn-default btn-xs" ng-model="trailer.Display" ng-click="trailer.Display = !trailer.Display" ng-show="!trailer.Display">Show</button>
+                                <button type="button" class="btn btn-default btn-xs"  ng-click="deleteTrailer(trailer)" >Delete</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <br/>
+                    <br />
+
+                    <form role="search">
+                        <div class="form-group editMovieButtons">
+                            <input type="text" ng-model="movieTrailerUrl" class="form-control" placeholder="url..">
+                        </div>
+                        <button type="submit" class="btn btn-default" ng-click="addTrailer(object, movieTrailerUrl)">Add</button>
+                        <button type="submit" class="btn btn-default" ng-click="clearMovieTrailerUrl()">Clear</button>
+                    </form>
+                </tab>
+
+            </tabset>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="save(object)">Save</button>
+            <button class="btn btn-primary" ng-click="undo()">Undo</button>
+            <button class="btn btn-warning" ng-click="cancel()">Close</button>
+        </div>
+    </script>
+
+  
+            <div class="pageContent">
+            <div class="col-lg-4">
+                <div class="panel panel-primary widget">
+                    <div class="panel-heading widgetHeading">
+                        <h2>Search</h2>
+                        <div class="widgetHeaderToolbar">
+                            <a class="pull-right glyphicon widgetHeaderButton" ng-class="{'glyphicon-chevron-up': showMovieSearchDiv, 'glyphicon-chevron-down': !showMovieSearchDiv}" ng-click="showMovieSearchDiv = !showMovieSearchDiv"></a>
+                        </div>
+                    </div>
+
+                    <div class="widgetBody" ng-show="showMovieSearchDiv">
+                        <div class="widgetContent maxHeight_800 movieSearch">
+                            <table class="table">
+                                <thead>
+                                    <tr class="tableHeader">
+                                        <th>Name</th>
+                                        <th>Year</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tableSubHeader">
+                                            <input ng-keyup="$event.keyCode == 13 ? movieDatabaseSearch(searchResults_searchName) : null" type="text" class="input-filter form-control" ng-model="searchResults_searchName" />
+                                        </th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tr dir-paginate="movie in searchResults | filter: {Name : searchResults_searchName} | itemsPerPage: 15: 'searchResults'" pagination-id="searchResults">
+                                    <td>{{movie.Name}}</td>
+                                    <td>{{movie.Year}}</td>
+                                    <td><a class="btn btn-default btn-xs" ng-click="addNewMovie(movie)">Add</a></td>
+                                </tr>
+                            </table>
+                            <dir-pagination-controls template-url="App/directives/pagination/dirPagination.tpl.html" pagination-id="searchResults"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="panel panel-primary widget">
+                    <div class="panel-heading widgetHeading">
+                        <h2>Movies</h2>
+                        <div class="widgetHeaderToolbar">
+                            <a class="pull-right glyphicon widgetHeaderButton" ng-class="{'glyphicon-chevron-up': showOurMoviesDiv, 'glyphicon-chevron-down': !showOurMoviesDiv}" ng-click="showOurMoviesDiv = !showOurMoviesDiv"></a>
+                        </div>
+                    </div>
+
+                        <div class="widgetBody" ng-show="showOurMoviesDiv">
+                            <div class="widgetContent maxHeight_800 ourMovies">
+                                <table class="table">
+                                    <thead>
+                                        <tr class="tableHeader">
+                                            <th>Name</th>
+                                            <th>RunTime</th>
+                                            <th>Rating</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tableSubHeader">
+                                                <input type="text" class="input-filter form-control" ng-model="wolfMovies_searchName"/>
+                                            </th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tr dir-paginate="movie in wolfMovies | filter: {Name : wolfMovies_searchName} | itemsPerPage: 15: 'wolfMovies'" pagination-id="wolfMovies" ">
+                                        <td>{{movie.Name}}</td>
+                                        <td>{{movie.RunTime}}</td>
+                                        <td>{{movie.Rating}}</td>
+                                        <td>
+                                            <a class="btn btn-default btn-xs" ng-click="editMovie(movie)">Edit</a>
+                                            <a class="btn btn-default btn-xs" ng-click="deleteMovie(movie.MovieId)">Delete</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <dir-pagination-controls template-url="App/directives/pagination/dirPagination.tpl.html" pagination-id="wolfMovies"></dir-pagination-controls>
+                            </div>
+                        </div>
+</div>
+            </div>
+
+                <!----
+            <div class="col-lg-4">
+                <div class="panel panel-primary widget">
+                    <div class="panel-heading widgetHeading">
+                        <h2>Edit</h2>
+                        <span class="pull-right glyphicon widgetHeaderButton" ng-class="{'glyphicon-chevron-up': showMovieInformationDiv, 'glyphicon-chevron-down': !showMovieInformationDiv}" ng-click="showMovieInformationDiv = !showMovieInformationDiv"></span>
+                        <span class="pull-right glyphicon glyphicon-floppy-disk widgetHeaderButton" ng-click="updateMovie(selectedMovie)"></span>
+                    </div>
+                    <div class="widgetBody" ng-show="showMovieInformationDiv">
+                        <div class="widgetContent maxHeight_800">
+                            <tabset justified="true">
+                                <tab heading="Basic">
+                                    <form role="form" id="movieBasicInformationForm" class="movieInformation">
+                                        <div class="form-group">
+                                            <label for="movieName">Name</label>
+                                            <input type="text" class="form-control" id="movieName" ng-model="selectedMovie.Name" name="Name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="movieRating">Rating</label>
+                                            <input type="text" class="form-control" id="movieRating" ng-model="selectedMovie.Rating" name="Rating">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="movieRuntime">Runtime</label>
+                                            <input type="text" class="form-control" id="movieRuntime" ng-model="selectedMovie.RunTime" name="RunTime">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="movieYear">Year</label>
+                                            <input type="text" class="form-control" id="movieYear" ng-model="selectedMovie.Year" name="Year">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="movieDescription">Description</label>
+                                            <textarea class="form-control" id="movieDescription" ng-model="selectedMovie.Description" name="Description"></textarea>
+                                        </div>
+                                    </form>
+                                </tab>
+                                <tab heading="Media">
+                                    <div class="editContent" ng-show="selectedMovie">
+
+                                        <br />
+                                        <br />
+                                        <nav class="navbar navbar-default noMargin noBottomBorder noBorderRadius">
+                                            <div class="container-fluid">
+                                                <div class="navbar-header">
+                                                    <a class="navbar-brand">Posters</a>
+                                                </div>
+                                                <div class="collapse navbar-collapse">
+                                                    <form role="form" class="navbar-form navbar-left" id=" movieposterform" enctype="multipart/form-data">
+                                                        <div class="form-group">
+                                                            <input id="customMoviePoster" class="form-control" name="customMoviePoster" type="file" file-style="" />
+                                                        </div>
+                                                        <button class="btn btn-default" ng-click="uploadPoster('customMoviePoster', selectedMovie)">Add</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </nav>
+                                        <ul class="list-inline moviePostersList">
+                                            <li ng-repeat="poster in selectedMovie.Posters">
+                                                <div class="moviePoster" ng-click="poster.Display = !poster.Display">
+                                                    <img ng-src="{{poster.FileLocation}}" />
+                                                    <span ng-show="poster.Display" class="glyphicon glyphicon-check selectedPoster"></span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="editContent" ng-show="selectedMovie">
+                                        <br />
+                                        <br />
+                                        <nav class="navbar navbar-default noMargin noBottomBorder noBorderRadius">
+                                            <div class="container-fluid">
+                                                <div class="navbar-header">
+                                                    <a class="navbar-brand">Trailers</a>
+                                                </div>
+                                                <form class="navbar-form navbar-left" role="search">
+                                                    <div class="form-group">
+                                                        <input type="text" ng-model="$parent.movieTrailerUrl" class="form-control" placeholder="url..">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-default" ng-click="addTrailer(selectedMovie)">Add</button>
+                                                    <button type="submit" class="btn btn-default" ng-click="clearMovieTrailerUrl()">Clear</button>
+                                                </form>
+                                            </div>
+                                        </nav>
+
+                                        <div class="widgetMessage" ng-show="selectedMovie.Trailers.length == 0">This movie does not have any trailers.</div>
+
+                                        <ul class="list-group trailers">
+                                            <li ng-click="$parent.selectedTrailer = !$parent.selectedTrailer" class="list-group-item" ng-repeat="trailer in selectedMovie.Trailers">
+                                                <a class="pull-left" ng-click="viewTrailer(trailer)">Trailer</a>
+                                                <input type="checkbox" ng-model="trailer.Display" class="pull-right" />
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </tab>
+
+                            </tabset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                    --->
+        </div>
+    
+</div>
+
+

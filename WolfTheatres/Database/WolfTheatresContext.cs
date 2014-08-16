@@ -22,6 +22,7 @@ namespace WolfTheatres.Database
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<EmployeeShift> EmployeeShifts { get; set; }
+        public DbSet<MovieShowtime> MovieShowtimes { get; set; }
         public DbSet<Poster> Posters { get; set; }
         public DbSet<Trailer> Trailers { get; set; }
 

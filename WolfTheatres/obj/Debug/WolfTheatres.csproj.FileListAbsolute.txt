@@ -24,7 +24,6 @@ C:\Development\WolfTheatres\WolfTheatres\bin\System.Web.WebPages.dll
 C:\Development\WolfTheatres\WolfTheatres\bin\System.Web.WebPages.Razor.dll
 C:\Development\WolfTheatres\WolfTheatres\bin\WebGrease.dll
 C:\Development\WolfTheatres\WolfTheatres\bin\EntityFramework.xml
-C:\Development\WolfTheatres\WolfTheatres\bin\Newtonsoft.Json.xml
 C:\Development\WolfTheatres\WolfTheatres\bin\System.Net.Http.Formatting.xml
 C:\Development\WolfTheatres\WolfTheatres\bin\System.Web.Helpers.xml
 C:\Development\WolfTheatres\WolfTheatres\bin\System.Web.Http.xml
@@ -69,3 +68,4 @@ C:\Development\WolfTheatres\WolfTheatres\bin\zh-Hant\System.Spatial.resources.dl
 C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.dll
 C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.pdb
 C:\Development\WolfTheatres\WolfTheatres\obj\Debug\WolfTheatres.csprojResolveAssemblyReference.cache
+C:\Development\WolfTheatres\WolfTheatres\bin\Newtonsoft.Json.xml

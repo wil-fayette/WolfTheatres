@@ -15,86 +15,35 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 
+
 namespace WolfTheatres.Controllers
 {
     public class MovieController : ApiController
     {
         private const string POSTER_IMAGE_LOCATION = "Movies/Posters/";
+        private TheMovieDatabaseController movieDatabase = new TheMovieDatabaseController();
 
         private WolfTheatresContext db = new WolfTheatresContext();
 
-        // GET api/Movie
         public IEnumerable<Movie> GetMovies()
         {
             return db.Movies.AsEnumerable();
         }
 
-        // GET api/Movie/5
         public Movie GetMovie(int id)
         {
             Movie movie = db.Movies.Find(id);
-            if (movie == null)
-            {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
-            }
-
+          
             return movie;
         }
 
-        // PUT api/Movie/5
-        public HttpResponseMessage PutMovie(int id, Movie movie)
+        [System.Web.Http.HttpPost]
+        public Movie AddNewMovie(int movieDbId)
         {
-            if (!ModelState.IsValid)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
-            }
+            Movie movie = movieDatabase.GetMovieDetails(movieDbId);
 
-            if (id != movie.MovieId)
-            {
-                return Request.CreateResponse(HttpStatusCode.BadRequest);
-            }
-
-            db.Entry(movie).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, ex);
-            }
-
-            return Request.CreateResponse(HttpStatusCode.OK);
-        }
-
-        // POST api/Movie
-        public Movie PostMovie(Movie movie)
-        {
-            if (!ModelState.IsValid)
-                return null;
-
-            var databaseMovie = db.Movies.Find(movie.MovieId);
-
-            if (databaseMovie == null)
-            {
-                if (movie.Posters.Count > 0)
-                {
-                    var displayOrder = 1;
-                    foreach (var poster in movie.Posters)
-                    {
-                        GetPosterImage(poster, movie.MovieId);
-                        displayOrder++;
-                    }
-                    if (movie.Posters.Count > 0)
-                        movie.Posters.First().Display = true;
-                }
-                movie.Trailers = GetMovieTrailers(movie.ImdbId, movie.MovieId);
-            }
-            else
-            {
-                this.DeleteMovie(databaseMovie.MovieId);
-            }
+            foreach (var poster in movie.Posters)
+                GetPosterImage(poster);
 
             db.Movies.Add(movie);
             db.SaveChanges();
@@ -102,126 +51,161 @@ namespace WolfTheatres.Controllers
             return movie;
         }
 
-        public int PostMovies(IEnumerable<Movie> movies)
-        {
-            if (!ModelState.IsValid)
-                return 0;
+        [System.Web.Http.HttpPost]
+        public Movie UpdateMovie(Movie movie) {
            
-            foreach (var movie in movies)
-            {
-                if (db.Movies.Find(movie.MovieId) == null)
-                {
-                    if (movie.Posters.Count > 0)
-                    {
-                        var displayOrder = 1;
-                        foreach (var poster in movie.Posters)
-                        {
-                            GetPosterImage(poster, movie.MovieId);
-                            displayOrder++;
-                        }
-                        if (movie.Posters.Count > 0)
-                            movie.Posters.First().Display = true;
-                    }
+            if (!ModelState.IsValid)
+                return null;
 
-                    db.Movies.Add(movie);
-                }
-            }
+            db.Entry(movie).State = EntityState.Modified;
+
+            foreach (var poster in movie.Posters)
+                db.Entry(poster).State = EntityState.Modified;
+                
+
+            foreach (var trailer in movie.Trailers)
+                db.Entry(trailer).State = EntityState.Modified;
 
             db.SaveChanges();
-            return 1;
-        }
 
-        private void GetPosterImage(Poster poster, int movieId)
+            return movie;
+        }
+        
+       
+        private void GetPosterImage(Poster poster)
         {
             poster.PosterId = Guid.NewGuid();
             var webClient = new WebClient();
 
             if (!string.IsNullOrEmpty(poster.ImageUrl))
             {
-                webClient.DownloadFile(poster.ImageUrl, HttpContext.Current.Server.MapPath("~/" + POSTER_IMAGE_LOCATION) + movieId + ".png");
-                poster.FileLocation = POSTER_IMAGE_LOCATION + movieId + ".png";
+                webClient.DownloadFile(poster.ImageUrl, HttpContext.Current.Server.MapPath("~/" + POSTER_IMAGE_LOCATION) + poster.MovieId + ".jpg");
+                poster.FileLocation = POSTER_IMAGE_LOCATION + poster.MovieId + ".jpg";
             }
         }
 
-        private List<Trailer> GetMovieTrailers(int imdbId, int movieId)
+        [System.Web.Http.HttpDelete]
+        public int DeleteMovieTrailer(Guid trailerId)
         {
-            var trailers = new List<Trailer>();
+            var trailer = db.Trailers.Find(trailerId);
 
-            var count = 4;
-            var width = 680;
+            if (trailer == null)
+                return 0;
 
-            using (var webClient = new WebClient())
-            {
-                string xml = webClient.DownloadString("http://api.traileraddict.com/?imdb=" + imdbId + "&count=" + count + "&width=" + width);
-                XDocument document = XDocument.Parse(xml);
-                
+            db.Trailers.Remove(trailer);
+            db.SaveChanges();
 
-                foreach (var element in document.Descendants("embed")) {
-                    var pattern = "(<iframe .+></iframe>)";
-
-                    string trailerUrl = "";
-
-                    if (Regex.IsMatch(element.Value, pattern)) {
-                        trailerUrl = Regex.Match(element.Value, pattern).Value;
-                    }
-                    
-                    trailers.Add(new Trailer
-                    {
-                        TrailerId = Guid.NewGuid(),
-                        TrailerUrl = trailerUrl,
-                        Display = false,
-                        MovieId = movieId
-                    });
-                }
-            }
-
-            return trailers ;
+            return 1;
         }
 
-        // DELETE api/Movie/5
-        public HttpResponseMessage DeleteMovie(int id)
+        [System.Web.Http.HttpPost]
+        public Trailer AddMovieTrailer(Trailer trailer)
         {
-            Movie movie = db.Movies.Find(id);
-            if (movie == null)
-            {
-                return Request.CreateResponse(HttpStatusCode.NotFound);
-            }
-            if (movie.Posters.Count > 0)
-            {
-                foreach (var poster in movie.Posters.ToList())
-                {
-                    var databasePoster = db.Posters.Find(poster.PosterId);
-                    if (databasePoster != null)
-                    {
-                        if (File.Exists(HttpContext.Current.Server.MapPath("~/" + databasePoster.FileLocation)))
-                            File.Delete((HttpContext.Current.Server.MapPath("~/" + databasePoster.FileLocation)));
+            if (!trailer.TrailerUrl.Contains("https://") && !trailer.TrailerUrl.Contains("http://"))
+                return null;
 
-                        db.Posters.Remove(databasePoster);
-                    }
-                }                
-            }
-
-            if (movie.Trailers.Count > 0)
-            {
-                foreach (var trailer in movie.Trailers.ToList())
-                {
-                    var databaseTrailer = db.Trailers.Find(trailer.TrailerId);
-                    if (databaseTrailer != null)
-                        db.Trailers.Remove(databaseTrailer);
-                }
-            }
-            db.Movies.Remove(movie);
-
-            try
-            {
+            Uri url;
+            if(Uri.TryCreate(trailer.TrailerUrl,UriKind.RelativeOrAbsolute,out url)){
+                trailer.TrailerId = Guid.NewGuid();
+                db.Trailers.Add(trailer);
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, ex);
-            }
+            
+            return trailer;
+        }
 
-            return Request.CreateResponse(HttpStatusCode.OK, movie);
+        [System.Web.Http.HttpDelete]
+        public void DeleteMovie(Guid movieId)
+        {
+            Movie movie = db.Movies.Find(movieId);
+            if (movie != null) {
+
+                DeleteMoviePosters(movie.Posters);
+                DeleteMovieTrailers(movie.Trailers);
+                DeleteMovieShowtimes(movie.MovieShowtimes);
+
+                db.Movies.Remove(movie);
+                db.SaveChanges();
+            }
+        }
+
+        private void DeleteMovieShowtimes(List<MovieShowtime> showtimes)
+        {
+            if (showtimes.Count > 0)
+            {
+                foreach (var showtime in showtimes.ToList())
+                {
+                    this.DeleteMovieShowtime(showtime.MovieShowtimeId);
+                }
+            }
+        }
+
+        private void DeleteMovieShowtime(Guid showtimeId)
+        {
+            var databaseShowtime = db.MovieShowtimes.Find(showtimeId);
+            if (databaseShowtime != null)
+                db.MovieShowtimes.Remove(databaseShowtime);
+        }
+
+        public List<MovieShowtime> GetMovieShowtimes()
+        {
+            return db.MovieShowtimes.ToList();
+        }
+
+        public void SaveMovieShowtimes(List<MovieShowtime> showtimes)
+        {
+            foreach (var showtime in showtimes)
+            {
+                var dbShowtime = db.MovieShowtimes.Find(showtime.MovieShowtimeId);
+
+                if (dbShowtime != null && dbShowtime.Showtimes != showtime.Showtimes)
+                {
+                    dbShowtime.Showtimes = showtime.Showtimes;
+                }
+                else
+                {
+                    db.MovieShowtimes.Add(showtime);
+                }
+
+                db.SaveChanges();
+            }
+        }
+
+        private void DeleteMovieTrailers(List<Trailer> trailers)
+        {
+            if (trailers.Count > 0)
+            {
+                foreach (var trailer in trailers.ToList())
+                {
+                    this.DeleteMovieTrailer(trailer.MovieId);
+                }
+            }
+        }
+
+        private void DeleteMoviePosters(List<Poster> posters) {
+            if (posters.Count > 0)
+            {
+                foreach (var poster in posters.ToList())
+                {
+                    this.DeleteMoviePoster(poster.PosterId);
+                }
+            }
+        }
+
+        public int DeleteMoviePoster(Guid posterId)
+        {
+            var poster = db.Posters.Find(posterId);
+
+            if (poster == null)
+                return 0;
+
+            if (File.Exists(HttpContext.Current.Server.MapPath("~/" + poster.FileLocation)))
+                File.Delete((HttpContext.Current.Server.MapPath("~/" + poster.FileLocation)));
+
+            db.Posters.Remove(poster);
+            db.SaveChanges();
+
+            return 1;
         }
 
         protected override void Dispose(bool disposing)

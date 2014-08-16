@@ -4,6 +4,7 @@
     <script src="/App/Scripts/jquery-2.1.1.js"></script>
     <script src="/App/Scripts/snap.js"></script>
     <script src="/App/Scripts/angular.js"></script>
+    <script src="/App/Scripts/angular-sanitize.js"></script>
     <script src="/App/Scripts/angular-resource.js"></script>
     <script src="/App/Scripts/angular-animate.js"></script>
     <script src="/App/Scripts/angular-route.js"></script>
@@ -11,15 +12,17 @@
     <script src="/App/Scripts/jquery.linq.js"></script>
     <script src="/App/Scripts/ui-bootstrap-tpls-0.10.0.min.js"></script>
     <script src="/App/Scripts/bootstrap-filestyle.min.js"></script>
+    <script src="/App/Scripts/ng-table.js"></script>
+    <script src="/App/Scripts/dirPagination.js"></script>
     <script src="/App/Scripts/app.js"></script>
+
+    <link href="/App/Content/ng-table.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="/App/Content/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="/App/Content/site.css" />
     <link rel="stylesheet" type="text/css" href="/App/Content/animations.css" />
 
     <title>Wolf Theatres</title>
 </head>
-
-
 
 <body>
             <div id="topNavigation" class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -31,17 +34,17 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#">Wolf Theatres</a>
+                        <a class="navbar-brand wolfLogoSection" href="#">Wolf Theatres</a>
                     </div>
-                </div>
+                </div>      
             </div>
 
             <div class="col-sm-1 col-md-1 sidebar">
                 <ul class="nav nav-sidebar">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#movies">Movies</a></li>
-                    <li><a href="#showtimes">Showtimes</a></li>
-                    <li><a href="#">Export</a></li>
+                    <li><a href="#movies/info">Home</a><div class="arrow-left"></div></li>
+                    <li><a href="#movies/schedule">Movies</a></li>
+                    <li><a href="#movies/schedule">Employees</a></li>
+                    <li><a href="#movies/schedule">Website</a></li>
                 </ul>
             </div>
             

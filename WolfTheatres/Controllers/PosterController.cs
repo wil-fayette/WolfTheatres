@@ -31,14 +31,14 @@ namespace WolfTheatres.Controllers
                     postedFile.SaveAs(filePath);
 
                     var fileLocation = POSTER_IMG_LOCATION_WEB + postedFile.FileName;            
-                    var movieId = httpRequest.Form["movieId"];
+                    var movieId = Guid.Parse(httpRequest.Form["movieId"]);
 
                     var poster = new Poster
                     {
                         PosterId = Guid.NewGuid(),
                         Display = true,
                         FileLocation = fileLocation,
-                        MovieId = Int32.Parse(movieId)
+                        MovieId = movieId
                     };
 
                     db.Posters.Add(poster);
@@ -53,6 +53,5 @@ namespace WolfTheatres.Controllers
             }
             return result;
         }
-
     }
 }

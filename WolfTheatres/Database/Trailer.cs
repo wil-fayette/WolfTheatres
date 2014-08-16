@@ -7,9 +7,14 @@ namespace WolfTheatres.Database
 {
     public class Trailer
     {
+        public Trailer()
+        {
+            this.TrailerId = Guid.NewGuid();
+        }
+
         public Guid TrailerId { get; set; }
         public bool Display { get; set; }
         public string TrailerUrl { get; set; }
-        public int MovieId { get; set; }
+        public Guid MovieId { get; set; }
     }
 }
