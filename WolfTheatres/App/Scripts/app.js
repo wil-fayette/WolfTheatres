@@ -1,4 +1,4 @@
-﻿var WolfTheatresApp = angular.module("WolfTheatresApp", ["ngResource", "ngRoute", "ui.bootstrap", "ngAnimate", "snap", "ngSanitize", "ngTable", "angularUtils.directives.dirPagination"]).config(function ($routeProvider) {
+﻿var WolfTheatresApp = angular.module("WolfTheatresApp", ["ngResource", "ngRoute", "ui.bootstrap", "ngAnimate", "snap", "ngSanitize", "angularUtils.directives.dirPagination", "ui.utils"]).config(function ($routeProvider) {
     $routeProvider.
         when('/', { controller: 'HomeController', templateUrl: 'App/Views/main.html' }).
         when('/employees', { controller: 'EmployeesController', templateUrl: 'App/Views/employees.html' }).
@@ -110,7 +110,7 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
         var currentRoute = $location.path().substring(1) || 'home';
         return page === currentRoute ? 'active' : '';
     }
-}).controller('MovieInformationController', function ($scope, $filter, $http, $timeout, $rootScope, wolfMovieService, $sce, $modal, movieDatabaseService, ngTableParams) {
+}).controller('MovieInformationController', function ($scope, $filter, $http, $timeout, $rootScope, wolfMovieService, $sce, $modal, movieDatabaseService) {
     var apiKey = 'pup7g2wafuxya22ryzfvyung';
     $scope.wolfMovies = [];
     $scope.searchResults = [];
@@ -209,59 +209,99 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
     $scope.dt = new Date();
     $scope.moviesPlayingOnSelectedDate = [];
     $scope.dates = [];
-    
-    function addDates(movies, dates) {
-        for (var i = 0; i < movies.length; i++) {
-            addDate(movies[i], dates);
+    $scope.copyDate;
+    $scope.copy = false;
+    $scope.showtimeDates = {};
+    $scope.selectedDate;
+    $scope.cats = [1, 2, 3, 4, 5];
+  
+    wolfMovieService.getMovieShowtimes(function (data) {
+        for (var i = 0; i < data.length; i++) {
+            addToShowtimeDates(data[i]);
         }
+    });
+
+    $scope.cat = function (showtime) {
+
+        if (showtime.length > 0) {
+            var schedulDate = showtime[0].ScheduleDate;
+            return schedulDate == $filter('date')($scope.dt, 'yyyy-MM-dd');
+        }
+
+        return false;
     }
 
-    function addDate(movie, dates) {
-        for (var j = 0; j < movie.MovieShowtimes.length; j++) {
-            if ($.inArray(movie.MovieShowtimes[j].ScheduleDate, dates) == -1) {
-                dates.push(movie.MovieShowtimes[j].ScheduleDate);
-            }
-        }
+    function addToShowtimeDates(movieShowtime) {
+
+        if (!$scope.showtimeDates.hasOwnProperty(movieShowtime.ScheduleDate)) 
+            $scope.showtimeDates[movieShowtime.ScheduleDate] = [];
+        
+        $scope.showtimeDates[movieShowtime.ScheduleDate].push(movieShowtime);
     }
 
-    $scope.filterByDate = function (date) {
-        return function (movieShowtime) {
+    function fixDate(date) {
+        if (date.length == 19) {
+            var year = date.substring(0, 4);
+            var month = date.substring(5, 7);
+            var day = date.substring(8, 10);
 
-            var showtimeDate = movieShowtime.ScheduleDate;
-
-            if (showtimeDate.length == 19) {
-                var year = movieShowtime.ScheduleDate.substring(0, 4);
-                var month = movieShowtime.ScheduleDate.substring(5, 7);
-                var day = movieShowtime.ScheduleDate.substring(8, 10);
-
-                var dateString = month + "-" + day + "-" + year;
-                showtimeDate = new Date(dateString);
-
-                showtimeDate.setHours(0, 0, 0, 0);
-            }
+            var dateString = month + "-" + day + "-" + year;
+            date = new Date(dateString);
 
             date.setHours(0, 0, 0, 0);
-
-            return showtimeDate.getTime() == date.getTime();
         }
+        return date;
+    }
+
+    $scope.filterByDate = function (movieShowtime) {
+            var result = movieShowtime.ScheduleDate == $filter('date')($scope.dt, 'yyyy-MM-dd');
+            return result;
     };
     
+    $scope.setDate = function (date){
+        $scope.dt = fixDate(date);
+    }
+
+    $scope.deleteDate = function (date) {
+        delete $scope.showtimeDates[date];
+    }
+
     $scope.addMovieToSelectedDate = function (movie) {
-        debugger;
-        movie.MovieShowtimes.push({ MovieId: movie.MovieId, MovieShowtimeId: "", ScheduleDate: $scope.dt, Showtimes: "" });
-        addDate(movie, $scope.dates);
+
+        var formattedDate = $filter('date')($scope.dt, 'yyyy-MM-dd');
+
+        if (!$scope.showtimeDates.hasOwnProperty(formattedDate)) {
+            $scope.showtimeDates[formattedDate] = [];
+        }
+
+        $scope.showtimeDates[formattedDate].push({ MovieId: movie.MovieId, MovieShowtimeId: "", ScheduleDate: formattedDate, Showtimes: "", MovieName: movie.Name });
+    }
+
+    $scope.copyMode = function (dt) {
+        $scope.copyDate = dt;
+        $scope.copy = !$scope.copy;
     }
 
     wolfMovieService.getWolfMovies(function (data) {
-        debugger;
         $scope.wolfMovies = data;
-        addDates($scope.wolfMovies, $scope.dates);
-
+        //addDates($scope.wolfMovies, $scope.dates);
     });
 
+    $scope.$watch('dt', function () {
+        if ($scope.copy && $scope.copyDate != $scope.dt) {
+            var formattedDate = $filter('date')($scope.dt, 'yyyy-MM-dd');
+            var formattedCopyDate = $filter('date')($scope.copyDate, 'yyyy-MM-dd');
+            $scope.showtimeDates[formattedDate] = [];
+            for (var i = 0; i < $scope.showtimeDates[formattedCopyDate].length; i++) {
+                var movie = $scope.showtimeDates[formattedCopyDate][i];
+                $scope.showtimeDates[formattedDate].push({ MovieId: movie.MovieId, MovieShowtimeId: "", ScheduleDate: formattedDate, Showtimes: movie.Showtimes, MovieName: movie.MovieName });
+            }
+            $scope.dt = $scope.copyDate;
+        }
+    });
+
+ 
 });
-
-
 
 var ModalInstanceCtrl = function ($scope, wolfMovieService, $modalInstance, object, $sce) {
     $scope.movieTrailerUrl = "";
@@ -379,5 +419,19 @@ var ModalInstanceCtrl = function ($scope, wolfMovieService, $modalInstance, obje
         $modalInstance.dismiss('cancel');
     };
 };
+
+function addDates(movies, dates) {
+    for (var i = 0; i < movies.length; i++) {
+        addDate(movies[i], dates);
+    }
+}
+
+function addDate(movie, dates) {
+    for (var j = 0; j < movie.MovieShowtimes.length; j++) {
+        if ($.inArray(movie.MovieShowtimes[j].ScheduleDate, dates) == -1) {
+            dates.push(movie.MovieShowtimes[j].ScheduleDate);
+        }
+    }
+}
 
 

@@ -299,7 +299,7 @@ overflow: hidden;
  }
 
 .widgetBody {
-
+    overflow: hidden;
 }
 
 .tabContent {
@@ -324,7 +324,10 @@ overflow: hidden;
   padding: 15px;
 overflow: hidden;
 height: 65px;
-border-top: 1px solid #eee;
+}
+
+.activeCopy {
+    background-color: #8ac470 !important;
 }
 
 .noMargin {
