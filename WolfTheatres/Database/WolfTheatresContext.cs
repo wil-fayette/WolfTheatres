@@ -25,6 +25,7 @@ namespace WolfTheatres.Database
         public DbSet<MovieShowtime> MovieShowtimes { get; set; }
         public DbSet<Poster> Posters { get; set; }
         public DbSet<Trailer> Trailers { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

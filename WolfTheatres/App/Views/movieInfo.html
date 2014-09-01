@@ -10,7 +10,6 @@
         <div class="modal-footer">
             <button class="btn btn-primary" ng-click="select()">Select</button>
             <button class="btn btn-primary" ng-click="unSelect()">De-Select</button>
-
             <button class="btn btn-warning" ng-click="cancel()">Close</button>
         </div>
     </script>
@@ -127,7 +126,7 @@
     </script>
 
   
-            <div class="pageContent">
+        <div class="pageContent">
             <div class="col-lg-4">
                 <div class="panel panel-primary widget">
                     <div class="panel-heading widgetHeading">
@@ -157,7 +156,7 @@
                                 <tr dir-paginate="movie in searchResults | filter: {Name : searchResults_searchName} | itemsPerPage: 15: 'searchResults'" pagination-id="searchResults">
                                     <td>{{movie.Name}}</td>
                                     <td>{{movie.Year}}</td>
-                                    <td><a class="btn btn-default btn-xs" ng-click="addNewMovie(movie)">Add</a></td>
+                                    <td><a class="btn btn-default btn-xs" ng-disabled="addMovieDisabled" ng-click="addNewMovie(movie)">Add</a></td>
                                 </tr>
                             </table>
                             <dir-pagination-controls template-url="App/directives/pagination/dirPagination.tpl.html" pagination-id="searchResults"></dir-pagination-controls>
@@ -194,13 +193,13 @@
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tr dir-paginate="movie in wolfMovies | filter: {Name : wolfMovies_searchName} | itemsPerPage: 15: 'wolfMovies'" pagination-id="wolfMovies" ">
+                                    <tr dir-paginate="movie in wolfMovies | filter: {Name : wolfMovies_searchName} | itemsPerPage: 15: 'wolfMovies'" pagination-id="wolfMovies">
                                         <td>{{movie.Name}}</td>
                                         <td>{{movie.RunTime}}</td>
                                         <td>{{movie.Rating}}</td>
                                         <td>
                                             <a class="btn btn-default btn-xs" ng-click="editMovie(movie)">Edit</a>
-                                            <a class="btn btn-default btn-xs" ng-click="deleteMovie(movie.MovieId)">Delete</a>
+                                            <a class="btn btn-default btn-xs" ng-disabled="deleteMovieDisabled" ng-click="deleteMovie(movie.MovieId)">Delete</a>
                                         </td>
                                     </tr>
                                 </table>

@@ -152,12 +152,14 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Classes\MovieSearchResult.cs" />
     <Compile Include="Controllers\EmployeeController.cs" />
+    <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\PosterController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MovieController.cs" />
     <Compile Include="Controllers\TheMovieDatabaseController.cs" />
     <Compile Include="Database\Employee.cs" />
     <Compile Include="Database\EmployeeShift.cs" />
+    <Compile Include="Database\Image.cs" />
     <Compile Include="Database\Movie.cs" />
     <Compile Include="Database\MovieShowtime.cs" />
     <Compile Include="Database\Poster.cs" />
@@ -170,6 +172,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="App\Content\angular-snap.css" />
+    <Content Include="App\Content\jquery.scrollbar.css" />
+    <Content Include="App\Content\prettify.css" />
     <Content Include="App\Content\site.css" />
     <Content Include="App\Content\animations.css" />
     <Content Include="App\Controllers\controllers.js" />
@@ -177,7 +181,9 @@
     <Content Include="App\Scripts\angular-snap.js" />
     <Content Include="App\Scripts\app.js" />
     <Content Include="App\Scripts\bootstrap-filestyle.min.js" />
+    <Content Include="App\Scripts\jquery.scrollbar.js" />
     <Content Include="App\Scripts\jquery.slimscroll.js" />
+    <Content Include="App\Scripts\prettify.js" />
     <Content Include="App\Scripts\snap.js" />
     <Content Include="App\Views\employees.html" />
     <Content Include="App\Views\home.html" />
@@ -191,6 +197,7 @@
     <Content Include="App\Content\bootstrap-theme.min.css" />
     <Content Include="App\Content\bootstrap.css" />
     <Content Include="App\Content\bootstrap.min.css" />
+    <Content Include="App\Views\websiteIndex.html" />
     <Content Include="favicon.ico" />
     <Content Include="App\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />

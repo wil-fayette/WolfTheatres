@@ -1,18 +1,31 @@
-﻿var WolfTheatresApp = angular.module("WolfTheatresApp", ["ngResource", "ngRoute", "ui.bootstrap", "ngAnimate", "snap", "ngSanitize", "angularUtils.directives.dirPagination", "ui.utils"]).config(function ($routeProvider) {
+﻿var WolfTheatresApp = angular.module("WolfTheatresApp", ["ngResource", "ngCookies", "ngRoute", "ui.bootstrap", "ngAnimate", "snap", "ngSanitize", "angularUtils.directives.dirPagination", "ui.utils", 'jQueryScrollbar']).config(function ($routeProvider) {
     $routeProvider.
+        when('/login', { controller: 'LoginController', templateUrl: 'App/Views/login.html' }).
         when('/', { controller: 'HomeController', templateUrl: 'App/Views/main.html' }).
         when('/employees', { controller: 'EmployeesController', templateUrl: 'App/Views/employees.html' }).
         when('/movies/info', { controller: 'MovieInformationController', templateUrl: 'App/Views/movieInfo.html' }).
         when('/movies/schedule', { controller: 'MovieScheduleController', templateUrl: 'App/Views/movieSchedule.html' }).
         when('/movies/main', { templateUrl: 'App/Views/moviesMain.html' }).
+        when('/website/index', { controller: 'WebsiteIndexController', templateUrl: 'App/Views/websiteIndex.html'}).
         otherwise({ redirectTo: '/' });
+});
+
+WolfTheatresApp.run(function($rootScope, $location, $cookieStore) {
+  $rootScope.$on('$routeChangeSuccess', function () {
+    if($cookieStore.get('isLoggedIn') != true) {
+      $location.url("/login");
+    }else{
+        $rootScope.page = $location.$$path;
+        $rootScope.user = $cookieStore.get('user');
+        $rootScope.isLoggedIn = true;
+    }
+  });
 });
 
 WolfTheatresApp.directive('fileStyle', function () {
     return {
         restrict: 'A',
         link: function (scope, element, attrs) {
-            debugger;
             $(element).addClass('fileStyle');
             $(element).filestyle({ buttonText: "Select Image", input: false });
         }
@@ -44,6 +57,23 @@ WolfTheatresApp.factory('movieDatabaseService', function ($http) {
     return movieDatabaseService;
 });
 
+WolfTheatresApp.factory('imageService', function ($http) {
+    var imageService = {};
+
+    imageService.getImages = function (page, callback) {
+        $http.get('api/Image/get?page=' + page).success(function (data) {
+            callback(data);
+        });
+    }
+
+    imageService.deleteImage = function (imageId, callback){
+        $http.delete('api/Image/delete?imageId=' + imageId).success(function (data){
+            callback(data);
+        });
+    }
+    return imageService;
+});
+
 WolfTheatresApp.factory('wolfMovieService', function ($http) {
     var wolfMovieService = {};
     wolfMovieService.getWolfMovies = function (callback) {
@@ -59,7 +89,6 @@ WolfTheatresApp.factory('wolfMovieService', function ($http) {
     }
 
     wolfMovieService.addNewMovie = function (movieDbId, callback) {
-        debugger;
         $http.post('api/Movie/AddNewMovie?movieDbId=' +  movieDbId).success(function (data) {
             callback(data);
         });
@@ -67,12 +96,11 @@ WolfTheatresApp.factory('wolfMovieService', function ($http) {
 
     wolfMovieService.deleteMovie = function (movieId, callback) {
         $http.delete('api/Movie/DeleteMovie?movieId=' + movieId).success(function (data) {
-            return data;
+            callback(data);
         });
     }
 
     wolfMovieService.updateMovie = function (movie, callback) {
-        debugger;
         $http.post('api/Movie/UpdateMovie/', movie).success(function (data) {
             callback(data);
         });
@@ -102,6 +130,12 @@ WolfTheatresApp.factory('wolfMovieService', function ($http) {
         });
     }
 
+    wolfMovieService.saveMovieShowtimes = function (movieShowtimes, callback) {
+        $http.post('api/Movie/SaveMovieShowtimes/', movieShowtimes).success(function (data) {
+            callback(data);
+        });
+    }
+
     return wolfMovieService;
 });
 
@@ -121,6 +155,10 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
     $scope.movieTrailerUrl = "";
     $scope.selectedTrailer = true;
     $scope.selectedPoster = true;
+    $scope.copyDate;
+    $scope.paste;
+    $scope.addMovieDisabled = false;
+    $scope.deleteMovieDisabled = false;
 
     function removeMovieById(id, array) {
         for (var i = 0; i < array.length; i++) {
@@ -140,13 +178,13 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
         }
 
         if (!inArray) {
-            debugger;
             var indexOfMovie = $scope.searchResults.indexOf(movie);
             if (indexOfMovie != -1) {
                 $scope.searchResults.splice(indexOfMovie, 1);
             }
-
+            $scope.addMovieDisabled = true;
             wolfMovieService.addNewMovie(movie.MovieDbId, function (returnedMovie) {
+                $scope.addMovieDisabled = false;
                 $scope.wolfMovies.push(returnedMovie);
             });
         }
@@ -172,7 +210,9 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
 
     function deleteMovie(movieId) {
         removeMovieById(movieId, $scope.wolfMovies);
+        $scope.deleteMovieDisabled = true;
         wolfMovieService.deleteMovie(movieId, function (data) {
+            $scope.deleteMovieDisabled = false;
         });
     }
 
@@ -189,11 +229,6 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
         });
     }
 
-    movieDatabaseService.getUpcomingMovies(function (movies) {
-        //$scope.searchResults = movies;
-        $scope.searchResults = [];
-    });
-
     $scope.movieDatabaseSearch = function movieDatabaseSearch(query) {
         movieDatabaseService.search(query, function (movies) {
             $scope.searchResults = movies;
@@ -202,75 +237,143 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
     $scope.deleteMovie = deleteMovie;
 }).controller('ShowtimesController', function ($scope) {
 
-}).controller('MovieScheduleController', function ($scope, $filter, $http, $timeout, $rootScope, wolfMovieService, $sce, $modal, movieDatabaseService) {
+}).controller('MovieScheduleController', function ($scope, $filter, $http, $route, $timeout, $rootScope, wolfMovieService, $sce, $modal, movieDatabaseService) {
     $scope.wolfMovies = [];
     $scope.showOurMoviesDiv = true;
     $scope.showCalendarDiv = true;
-    $scope.dt = new Date();
+    $scope.dt = "";
     $scope.moviesPlayingOnSelectedDate = [];
     $scope.dates = [];
     $scope.copyDate;
     $scope.copy = false;
     $scope.showtimeDates = {};
     $scope.selectedDate;
-    $scope.cats = [1, 2, 3, 4, 5];
-  
+    $scope.showDate;
+    $scope.copyDate = '';
+    $scope.expand = false;
+    $scope.publish = true;
+
+    $scope.jqueryScrollbarOptions = {
+        "type": "simpble"
+    };
+
+    $scope.deleteShowtime = function (key, showtime) {
+        for (var i = 0; i < $scope.showtimeDates[key].length; i++) {
+            if ($scope.showtimeDates[key][i] == showtime) {
+                $scope.showtimeDates[key].splice(i, 1);
+            }
+        }
+
+        if ($scope.showtimeDates[key].length == 0) {
+            $scope.deleteShowtimeDate(key);
+        }
+    }
+
+    $scope.deleteShowtimeDate = function (key) {
+        delete $scope.showtimeDates[key];
+    }
+
     wolfMovieService.getMovieShowtimes(function (data) {
         for (var i = 0; i < data.length; i++) {
             addToShowtimeDates(data[i]);
         }
     });
 
-    $scope.cat = function (showtime) {
+    $scope.publish = function () {
+        var movies = [];
+        for (var showtimeDate in $scope.showtimeDates) {
 
-        if (showtime.length > 0) {
-            var schedulDate = showtime[0].ScheduleDate;
-            return schedulDate == $filter('date')($scope.dt, 'yyyy-MM-dd');
+            var showtimeDate = $scope.showtimeDates[showtimeDate];
+
+            for (var i = 0; i < showtimeDate.length; i++) {
+                movies.push(showtimeDate[i]);
+            }
+        }
+        wolfMovieService.saveMovieShowtimes(movies, function (data) {
+            $route.reload();
+        });
+    }
+
+    function addToShowtimeDates(movieShowtime) {
+
+        if (!$scope.showtimeDates.hasOwnProperty(movieShowtime.ScheduleDate))
+            $scope.showtimeDates[movieShowtime.ScheduleDate] = [];
+
+        $scope.showtimeDates[movieShowtime.ScheduleDate].push(movieShowtime);
+    }
+
+    $scope.pasteShowtimes = function (key) {
+        if ($scope.showtimeDates.hasOwnProperty(key) && $scope.showtimeDates.hasOwnProperty($scope.copyDate)) {
+            var copy = [];
+            var toCopy = $scope.showtimeDates[$scope.copyDate];
+
+            for (var i = 0; i < toCopy.length; i++) {
+                copy.push({ MovieId: toCopy[i].MovieId, MovieShowtimeId: "", ScheduleDate: key, Showtimes: toCopy[i].Showtimes, MovieName: toCopy[i].MovieName });
+            }
+
+            $scope.showtimeDates[key] = copy;
+        }
+    }
+
+
+    $scope.filterByDate = function (movieShowtime) {
+        var result = movieShowtime.ScheduleDate == $filter('date')($scope.dt, 'yyyy-MM-dd');
+        return result;
+    };
+
+    $scope.setDate = function (date) {
+        if ($scope.dt != date) {
+            $scope.dt = date;
+            return;
+        }
+
+        $scope.dt = "";
+    }
+
+    $scope.showPaste = function (key) {
+
+        if ($scope.copyDate != key && $scope.copyDate != '') {
+            return true;
         }
 
         return false;
     }
 
-    function addToShowtimeDates(movieShowtime) {
-
-        if (!$scope.showtimeDates.hasOwnProperty(movieShowtime.ScheduleDate)) 
-            $scope.showtimeDates[movieShowtime.ScheduleDate] = [];
-        
-        $scope.showtimeDates[movieShowtime.ScheduleDate].push(movieShowtime);
-    }
-
-    function fixDate(date) {
-        if (date.length == 19) {
-            var year = date.substring(0, 4);
-            var month = date.substring(5, 7);
-            var day = date.substring(8, 10);
-
-            var dateString = month + "-" + day + "-" + year;
-            date = new Date(dateString);
-
-            date.setHours(0, 0, 0, 0);
+    $scope.expand = function (bool) {
+        var i = 0;
+        for (var property in $scope.showtimeDates) {
+            debugger;
+            $(angular.element('.showDate')[i]).scope().showDate = bool;
+            i++;
         }
-        return date;
     }
 
-    $scope.filterByDate = function (movieShowtime) {
-            var result = movieShowtime.ScheduleDate == $filter('date')($scope.dt, 'yyyy-MM-dd');
-            return result;
-    };
-    
-    $scope.setDate = function (date){
-        $scope.dt = fixDate(date);
+    $scope.setCopyDate = function (key) {
+        $scope.copyDate = key;
     }
+
+    $scope.dateOptions = {
+        formatYear: 'yy',
+        startingDay: 1
+    };
 
     $scope.deleteDate = function (date) {
         delete $scope.showtimeDates[date];
     }
 
     $scope.addMovieToSelectedDate = function (movie) {
+        var i = 0;
+        for (var property in $scope.showtimeDates) {
+            if ($(angular.element('.showDate')[i]).scope().key == $scope.dt){
+                 $(angular.element('.showDate')[i]).scope().showDate = true;
+                 break;
+            }
+            i++;
+        }
 
         var formattedDate = $filter('date')($scope.dt, 'yyyy-MM-dd');
 
-        if (!$scope.showtimeDates.hasOwnProperty(formattedDate)) {
+        if (!$scope.showtimeDates.hasOwnProperty(formattedDate) && $scope.dt != "") {
             $scope.showtimeDates[formattedDate] = [];
         }
 
@@ -284,23 +387,101 @@ WolfTheatresApp.controller('NavigationController', function ($scope, $location) 
 
     wolfMovieService.getWolfMovies(function (data) {
         $scope.wolfMovies = data;
-        //addDates($scope.wolfMovies, $scope.dates);
     });
 
     $scope.$watch('dt', function () {
-        if ($scope.copy && $scope.copyDate != $scope.dt) {
-            var formattedDate = $filter('date')($scope.dt, 'yyyy-MM-dd');
-            var formattedCopyDate = $filter('date')($scope.copyDate, 'yyyy-MM-dd');
-            $scope.showtimeDates[formattedDate] = [];
-            for (var i = 0; i < $scope.showtimeDates[formattedCopyDate].length; i++) {
-                var movie = $scope.showtimeDates[formattedCopyDate][i];
-                $scope.showtimeDates[formattedDate].push({ MovieId: movie.MovieId, MovieShowtimeId: "", ScheduleDate: formattedDate, Showtimes: movie.Showtimes, MovieName: movie.MovieName });
-            }
-            $scope.dt = $scope.copyDate;
+        if ($scope.dt != "") {
+            var filteredDate = $filter('date')($scope.dt, 'yyyy-MM-dd');
+            if (!$scope.showtimeDates[filteredDate])
+                $scope.showtimeDates[filteredDate] = [];
         }
     });
 
- 
+
+}).controller('WebsiteIndexController', function ($scope, imageService) {
+    $scope.showCarousel = true;
+    $scope.publishDisabled = false;
+
+
+    function removeImageById(id, array) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i].ImageId === id) {
+                array.splice(i, 1);
+            }
+        }
+    }
+
+    imageService.getImages("HOME", function (data){
+        $scope.images = data;
+    });
+
+    $scope.selectImage = function(image){
+        if ($scope.selectedImage == image){
+            $scope.selectedImage = "";
+        }else {
+            $scope.selectedImage = image;
+        }
+    }
+
+    $scope.deleteImage = function(image){
+        imageService.deleteImage(image.ImageId, function (data){
+            removeImageById(image.ImageId, $scope.images);
+        });
+    }
+
+
+     $scope.uploadImage = function uploadImage(image) {
+        debugger;
+        if ($('#' + image).get(0) != null) {
+            var files = $('#' + image).get(0).files;
+
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (i = 0; i < files.length; i++) {
+                        data.append("file" + i, files[i]);
+                    }
+
+                    data.append("page", "HOME");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/Image/Post",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (results) {
+                            debugger;
+                            for (var i = 0; i < results.length; i++) {
+                                $scope.images.push(results[i]);
+
+                                if (!$scope.$$phase) {
+                                    $scope.$apply();
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    alert("This browser doesn't support HTML5 multiple file uploads!");
+                }
+            }
+        }
+    }
+
+
+}).controller('LoginController', function ($scope, $rootScope, $location, $cookieStore) {
+        $scope.user = {
+            name: "",
+            password: ""
+        };
+
+    $scope.submit = function (user){
+        if (user.name == "admin" && user.password == "Wolf!"){
+            $cookieStore.put('isLoggedIn', true);
+            $cookieStore.put('user', $scope.user);
+            $location.url("/movies/info");
+        }
+    }
 });
 
 var ModalInstanceCtrl = function ($scope, wolfMovieService, $modalInstance, object, $sce) {
@@ -308,7 +489,6 @@ var ModalInstanceCtrl = function ($scope, wolfMovieService, $modalInstance, obje
 
 
     $scope.uploadPoster = function uploadPoster(poster, movie) {
-        debugger;
         if ($('#' + poster).get(0) != null) {
             var files = $('#' + poster).get(0).files;
 
@@ -420,18 +600,5 @@ var ModalInstanceCtrl = function ($scope, wolfMovieService, $modalInstance, obje
     };
 };
 
-function addDates(movies, dates) {
-    for (var i = 0; i < movies.length; i++) {
-        addDate(movies[i], dates);
-    }
-}
-
-function addDate(movie, dates) {
-    for (var j = 0; j < movie.MovieShowtimes.length; j++) {
-        if ($.inArray(movie.MovieShowtimes[j].ScheduleDate, dates) == -1) {
-            dates.push(movie.MovieShowtimes[j].ScheduleDate);
-        }
-    }
-}
 
 

@@ -5,6 +5,7 @@
     <script src="/App/Scripts/snap.js"></script>
     <script src="/App/Scripts/angular.js"></script>
     <script src="/App/Scripts/angular-sanitize.js"></script>
+    <script src="/App/Scripts/angular-cookies.js"></script>
     <script src="/App/Scripts/angular-resource.js"></script>
     <script src="/App/Scripts/angular-animate.js"></script>
     <script src="/App/Scripts/angular-route.js"></script>
@@ -14,14 +15,19 @@
     <script src="/App/Scripts/bootstrap-filestyle.min.js"></script>
     <script src="/App/Scripts/ui-utils.js"></script>
     <script src="/App/Scripts/dirPagination.js"></script>
+    <script src="/App/Scripts/prettify.js"></script>
+    <script src="/App/Scripts/jquery.scrollbar.js"></script>
     <script src="/App/Scripts/app.js"></script>
+
 
     <link href="/App/Content/ng-table.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="/App/Content/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="/App/Content/site.css" />
     <link rel="stylesheet" type="text/css" href="/App/Content/animations.css" />
-
+    <link rel="stylesheet" type="text/css" href="/App/Content/jquery.scrollbar.css" />
+    <link rel="stylesheet" type="text/css" href="/App/Content/prettify.css" />
     <title>Wolf Theatres</title>
+
 </head>
 
 <body>
@@ -39,14 +45,32 @@
                 </div>      
             </div>
 
-            <div class="col-sm-1 col-md-1 sidebar">
-                <ul class="nav nav-sidebar">
-                    <li><a href="#movies/info">Home</a><div class="arrow-left"></div></li>
-                    <li><a href="#movies/schedule">Movies</a></li>
-                    <li><a href="#movies/schedule">Employees</a></li>
-                    <li><a href="#movies/schedule">Website</a></li>
+        <div class="col-sm-1 col-md-1 sidebar"><div ng-show="isLoggedIn">
+                <ul id="login">
+                    <li><span class="glyphicon glyphicon-user" style="padding-right: 10px;"></span>{{user.name}}</li>
                 </ul>
+
+                  <accordion class="sideBar" close-others="false">
+                    <accordion-group  is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+                    <accordion-heading>
+                        <span class="glyphicon glyphicon-film" style="padding-right: 10px;"></span>Movies
+                    </accordion-heading>
+                    <ul class="nav nav-sidebar dropdown sideNav">
+                                    <li><a href="#movies/info">Information</a><div ng-show="page == '/movies/info'"class="arrow-left"></div></li>
+                                    <li><a href="#movies/schedule">Schedule</a><div ng-show="page == '/movies/schedule'" class="arrow-left"></div></li>
+                                </ul>
+                    </accordion-group>
+                    <accordion-group heading="Website">
+                    <accordion-heading>
+                        <span class="glyphicon glyphicon-globe" style="padding-right: 10px;"></span>Website
+                    </accordion-heading>
+                        <ul class="nav nav-sidebar dropdown sideNav">
+                                    <li><a href="#website/index">Home</a><div ng-show="page == '/website/index'" class="arrow-left"></div></li>
+                                </ul>
+                    </accordion-group>
+                  </accordion>
             </div>
+        </div>
             
             <div class="main" ng-view="" > 
                    

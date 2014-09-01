@@ -1,0 +1,19 @@
+﻿   <div class="pageContent">
+   	<div class="col-lg-12">
+		        <div class="nav bar">
+                  <form role="form" id=" movieposterform" enctype="multipart/form-data" style="float: left; margin-right: 3px;">
+                    <div class="form-group editMovieButtons">
+                        <input id="imageUploader" class="form-control" name="imageUploader" type="file" file-style="" />
+                    </div>
+                    <button class="btn btn-default" ng-click="uploadImage('imageUploader', object)">Add</button>
+           		 </form>
+                	<button class="btn btn-default" ng-click="deleteImage(selectedImage)">Delete</button>
+                </div>
+	                    <div style="margin-top: 25px;">
+	                      <div ng-repeat="image in images" class="imageWidget" style="display: inline-block;" ng-class="{'selectedImage': selectedImage == image}" ng-click="selectImage(image)">
+	                      	<img src="{{image.FileLocation}}" style="height: 350px; width: 340px;" />
+	                      </div>
+	                    </div>
+                </div>
+            </div>
+           </div>

@@ -152,23 +152,27 @@ namespace WolfTheatres.Controllers
             return db.MovieShowtimes.ToList();
         }
 
-        public void SaveMovieShowtimes(List<MovieShowtime> showtimes)
+        public List<MovieShowtime> SaveMovieShowtimes(List<MovieShowtime> showtimes)
         {
+
+            var oldMovieShowtimes = db.MovieShowtimes.ToList();
+
+            foreach (var oldMovieShowtime in oldMovieShowtimes)
+            {
+                db.MovieShowtimes.Remove(oldMovieShowtime);
+            }
+
             foreach (var showtime in showtimes)
             {
-                var dbShowtime = db.MovieShowtimes.Find(showtime.MovieShowtimeId);
+                if (showtime.MovieShowtimeId == null)
+                    showtime.MovieShowtimeId = new Guid();
 
-                if (dbShowtime != null && dbShowtime.Showtimes != showtime.Showtimes)
-                {
-                    dbShowtime.Showtimes = showtime.Showtimes;
-                }
-                else
-                {
-                    db.MovieShowtimes.Add(showtime);
-                }
-
-                db.SaveChanges();
+                db.MovieShowtimes.Add(showtime);
             }
+
+            db.SaveChanges();
+
+            return db.MovieShowtimes.ToList();
         }
 
         private void DeleteMovieTrailers(List<Trailer> trailers)
@@ -194,18 +198,24 @@ namespace WolfTheatres.Controllers
 
         public int DeleteMoviePoster(Guid posterId)
         {
-            var poster = db.Posters.Find(posterId);
+            try
+            {
+                var poster = db.Posters.Find(posterId);
 
-            if (poster == null)
+                if (poster == null)
+                    return 0;
+
+                if (File.Exists(HttpContext.Current.Server.MapPath("~/" + poster.FileLocation)))
+                    File.Delete((HttpContext.Current.Server.MapPath("~/" + poster.FileLocation)));
+
+                db.Posters.Remove(poster);
+                db.SaveChanges();
+                return 1;
+            }
+            catch (Exception)
+            {
                 return 0;
-
-            if (File.Exists(HttpContext.Current.Server.MapPath("~/" + poster.FileLocation)))
-                File.Delete((HttpContext.Current.Server.MapPath("~/" + poster.FileLocation)));
-
-            db.Posters.Remove(poster);
-            db.SaveChanges();
-
-            return 1;
+            }
         }
 
         protected override void Dispose(bool disposing)

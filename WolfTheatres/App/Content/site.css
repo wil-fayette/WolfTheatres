@@ -4,18 +4,47 @@
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
-  padding-top: 50px !important;
-  position: relative;
-padding: 0;
-background-color: #e5e5e5;
-font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-font-size: 12px;
-color: #555;
-height: 100%;
+    padding-top: 50px !important;
+    position: relative;
+    padding: 0;
+    background-color: #e5e5e5;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 12px;
+    color: #555;
+    height: 100%;
+}
+
+.selectedDate {
+    background-color: #517A9B !important;
+    color: white !important;
+}
+
+.movieScheduleFirst {
+    width: 400px;
+}
+
+.movieScheduleSecond {
+    width: 531px;
+}
+
+.movieScheduleThird {
+    width: 255px;
 }
 
 html {
     height: 100%;
+}
+
+.scrollbar-dynamic {
+    max-height: 650px;
+    overflow: auto;
+}
+
+.groupByArrow {
+    color: #555;
+    position: relative;
+    text-decoration: none !important;
+    float: right;
 }
 
 .ng-table-pager {
@@ -114,9 +143,8 @@ border-radius: 3px;
 .nav-sidebar > li > a {
   padding-right: 20px;
   padding-left: 20px;
-  border-top: 1px solid #32353e;
-  border-bottom: 1px solid #1a1c20;
   color: #aaa;
+  font-size: 16px;
 }
 .nav-sidebar > .active > a {
   color: #ccc;
@@ -147,9 +175,8 @@ background-color: #e5e5e5;
 
 .pageContent {
     padding: 20px;
-padding-top: 30px;
-border-top: 1px solid #ddd;
-overflow: hidden;
+    padding-top: 30px;
+    border-top: 1px solid #ddd;
 }
 
 .pageNavigation ul {
@@ -192,7 +219,7 @@ overflow: hidden;
 }
 
 .widget {
-    overflow: hidden;
+    /*overflow: hidden;*/
     border-radius: 0px !important;
     border-right: 1px solid #bbb;
     border-bottom: 1px solid #bbb;
@@ -256,7 +283,7 @@ overflow: hidden;
     float: left;
     position: relative;
     top: -27px;
-    left: 205px;
+    left: 182px;
     width: 0;
     height: 0;
     border-top: 10px solid transparent;
@@ -299,11 +326,22 @@ overflow: hidden;
  }
 
 .widgetBody {
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 .tabContent {
     padding-top: 25px;
+}
+
+tr:hover .deleteRow {
+    display: block;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.deleteRow {
+    top: 4px;
+    display: none;
 }
 
 .widgetHeaderButton {
@@ -316,13 +354,34 @@ overflow: hidden;
     border-left: 1px solid #eee;
 }
 
+.groupByHeader {
+    font-weight: bold;
+}
+
+.white {
+    color: white;
+}
+
+.groupByHeader:hover {
+    color: #29599B;
+    cursor: pointer;
+    cursor: hand;
+}
+
+
+.groupByArrow:hover {
+   color: #29599B;
+   cursor: pointer;
+   cursor: hand;
+}
+
 .widgetOptions {
     margin-bottom: 15px;
 }
 
 .widgetFooter{
   padding: 15px;
-overflow: hidden;
+/*overflow: hidden;*/
 height: 65px;
 }
 
@@ -607,11 +666,11 @@ border-top-left-radius: 0px;
 
 .widgetHeading {
     overflow: hidden;
-border-radius: 0px;
-height: 37px;
-background-color: #fff!important;
-border-bottom: 1px solid #f1f1f1;
-padding: 0px;
+    border-radius: 0px;
+    height: 37px;
+    background-color: #fff!important;
+    border-bottom: 1px solid #f1f1f1;
+    padding: 0px;
 }
 
 .pageHolder {
@@ -625,3 +684,85 @@ padding: 0px;
     margin-top: 5px;
     border-radius: 3px;
 }
+
+.imageWidget {
+    display: inline-block;
+border-radius: 3px;
+border: 2px solid #ccc;
+margin-right: 20px;
+margin-bottom: 20px;
+}
+
+.imageWidget:hover {
+    cursor: hand;
+    cursor: pointer;
+}
+
+
+.selectedImage {
+    border: 2px solid #29599B;
+}
+
+table, tr, td {
+
+}
+
+#login {
+margin-right: -21px;
+margin-bottom: 20px;
+margin-left: -20px;
+overflow: hidden;
+padding: 15px;
+font-size: 14px;
+color: #aaa;
+border-top: 1px solid #222;
+border-bottom: 1px solid #222;
+}
+
+#login li {
+    list-style: none;
+    font-size: 16px;
+}
+
+
+.container {
+    margin-top: 10px;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+ }
+
+ .sideBar .panel {
+    margin-right: -21px;
+margin-left: -20px;
+background-color: inherit;
+border: none;
+ }
+
+ .sideBar .panel-heading {
+    background-color: none !important;
+    border: none;
+    color: #bbb;
+ }
+
+ .sideBar .panel-body {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-top: 0px !important;
+ }
+
+ .sideNav li {
+    height: 38px;
+    overflow: hidden;
+    padding-left: 28px;
+ }
+
+ .bar {
+    /* padding: 15px; */
+    background-color: #ccc;
+    padding-top: 15px;
+    padding-left: 15px;
+    background-color: #ccc;
+    border: 1px solid #bbb;
+ }

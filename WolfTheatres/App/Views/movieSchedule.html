@@ -1,22 +1,5 @@
 ﻿<div ng-controller="MovieScheduleController" class="pageContent">
-    <div class="col-lg-3">
-        <div class="panel panel-primary widget">
-            <div class="panel-heading widgetHeading">
-                <h2>Calendar</h2>
-                <div class="widgetHeaderToolbar">
-                    <a class="pull-right glyphicon widgetHeaderButton" ng-class="{'glyphicon-chevron-up': showCalendarDiv, 'glyphicon-chevron-down': !showCalendarDiv}" ng-click="showCalendarDiv = !showCalendarDiv"></a>
-                </div>
-            </div>
-
-            <div class="widgetBody" ng-show="showCalendarDiv">
-                <div class="widgetContent calendar">
-                    <div style="display:inline-block; height: 345px; overflow: hidden;">
-                        <datepicker ng-model="dt" min-date="minDate" show-weeks="false" class="well well-sm"></datepicker>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <div class="col-lg-4">
         <div class="panel panel-primary widget">
             <div class="panel-heading widgetHeading">
                 <h2>Our Movies</h2>
@@ -40,78 +23,75 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tr dir-paginate="wolfMovie in wolfMovies | filter: {Name: movies_searchName} | itemsPerPage: 4: 'wolfMovies'" pagination-id="wolfMovies">
+                        <tr dir-paginate="wolfMovie in wolfMovies | filter: {Name: movies_searchName} | itemsPerPage: 15: 'wolfMovies'" pagination-id="wolfMovies">
                             <td ng-mouseenter="show = true" ng-mouseleave="show = false" ng-click="selectMovie(wolfMovie)">{{wolfMovie.Name}}</td>
                             <td><button type="button" class="btn btn-default btn-xs" ng-click="addMovieToSelectedDate(wolfMovie)">Add</button></td>
                         </tr>
                     </table>
                     <dir-pagination-controls template-url="App/directives/pagination/dirPagination.tpl.html" pagination-id="wolfMovies"></dir-pagination-controls>
                 </div>
-                </div>
             </div>
-            </div>
+        </div>
+    </div>
 
-            <div class="col-lg-6">
+            <div class="col-lg-8">
                 <div class="panel panel-primary widget">
                     <div class="panel-heading widgetHeading">
-                        <h2>{{dt | date: shortDate}}</h2>
+                        <h2>Showtimes</h2>
                         <div class="widgetHeaderToolbar">
                             <a class="pull-right glyphicon widgetHeaderButton" ng-class="{'glyphicon-chevron-up': showCalendarDiv, 'glyphicon-chevron-down': !showCalendarDiv}" ng-click="showCalendarDiv = !showCalendarDiv"></a>
                         </div>
                     </div>
                     <div class="widgetBody">
                         <div class="widgetContent">
-                                <table class="table" ng-repeat="showtimes in showtimeDates" >
+                            <div>
+                                <table class="table">
                                     <thead>
                                         <tr class="tableHeader">
-                                            <th>Name</th>
-                                            <th>Showtimes</th>
-                                            <th>Actions</th>
+                                            <th class="">Name</th>
+                                            <th class="movieScheduleSecond">Showtimes</th>
+                                            <th class="movieScheduleThird">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tr ng-repeat="showtime in showtimes">
-                                        <td>{{showtime.MovieName}}</td>
-                                        <td style="min-width: 400px; padding: 0px;"><input style="width: 100%; padding-left: 8px; border: none; height: 100%;" type="text" ng-model="showtime.Showtimes"></td>
-                                        <td><button class="btn btn-default btn-xs">Delete</button></td>
-                                    </tr>
-                                </table>
+                               </table>
+                                <div class="scrollbar-dynamic" data-jquery-scrollbar="jqueryScrollbarOptions">
+                                    <table class="table">
+                                        <tbody style="border: none;" ng-repeat="(key, value) in showtimeDates" class="showDate">
+                                            <tr style="background-color: #f9f9f9;" ng-class="{selectedDate: key == dt}">
+                                                <td>
+                                                    <span class="groupByHeader" ng-click="setDate(key)">
+                                                        {{key | date : shortDate}}
+                                                    </span>
+                                                    <a class="glyphicon groupByArrow" ng-click="showDate = !showDate" ng-show="value.length > 0" ng-class="{'glyphicon-chevron-up': showDate, 'glyphicon-chevron-down': !showDate, white: key == dt}"></a>
+                                                </td>
+                                                <td class="movieScheduleSecond"></td>
+                                                <td class="movieScheduleThird">
+                                                    <button ng-show="!copyDate && copyDate != key" ng-click="setCopyDate(key)" class="btn btn-default btn-xs">Copy</button>
+                                                    <button ng-show="copyDate == key" ng-click="$parent.copyDate = ''" class="btn btn-warning btn-xs">Cancel</button>
+                                                    <button ng-show="showPaste(key)" ng-click="pasteShowtimes(key)" class="btn btn-success btn-xs">Paste</button>
+                                                    <span style="float: right;" ng-click="deleteShowtimeDate(key)" class="deleteRow glyphicon glyphicon-remove"></span>
+                                                </td>
+                                            </tr>
+                                            <tr ng-repeat="showtime in value" ng-show="showDate">
+                                                <td class="">{{showtime.MovieName}}</td>
+                                                <td class="movieScheduleSecond" style="padding: 0px;"><input style="width: 100%; padding-left: 8px; border: none; height: 100%;" type="text" ng-model="showtime.Showtimes"></td>
+                                                <td class="movieScheduleThird"><span style="float: right;" ng-click="deleteShowtime(key, showtime)" class="deleteRow glyphicon glyphicon-remove"></span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                     </div>
                     <div class="widgetFooter">
-                        <button class="btn btn-default" ng-class="{'activeCopy': copy}" ng-click="copyMode(dt)">Copy</button>
-                        <button class="btn btn-default" ng-click="deleteDate(dt)">Delete</button>
+                        <button style="float: right;" class="btn btn-primary" ng-click="publish(); publish = false" ng-disabled="!publish" ng-dblclick="">Publish</button>
+                        <button class="btn btn-default" ng-click="expand(true)">Expand</button>
+                        <button class="btn btn-default" ng-click="expand(false)">Collapse</button>
+                        <div style="float: left; position: relative; top: -1px; margin-right: 3px;">
+                            <button type="text" class="form-control glyphicon glyphicon-calendar" close-on-date-selection="false" datepicker-popup="{{format}}" ng-model="dt" is-open="opened"  datepicker-options="dateOptions" ng-required="true" close-text="Close"></button>
+                        </div>
                     </div>
                 </div>
                 
              </div>
                 </div>
-    <div class="col-lg-3">
-        <div class="panel panel-primary widget">
-            <div class="panel-heading widgetHeading">
-                <h2>Scheduled Dates</h2>
-                <div class="widgetHeaderToolbar">
-                    <a class="pull-right glyphicon widgetHeaderButton" ng-class="{'glyphicon-chevron-up': showCalendarDiv, 'glyphicon-chevron-down': !showCalendarDiv}" ng-click="showCalendarDiv = !showCalendarDiv"></a>
-                </div>
-            </div>
-            <div class="widgetContent">
-                <div class="widgetBody">
-                    <table class="table col-lg-3">
-                        <thead>
-                            <tr class="tableHeader">
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tr dir-paginate="cat in cats | itemsPerPage: 1: 'cat'" pagination-id="cat">
-                            <td>{{cat}}</td>
-                            <td>
-                                <button type="button" class="btn btn-default btn-xs" ng-click="setDate(cat)">Select</button>
-                                <button type="button" class="btn btn-default btn-xs" ng-click="deleteDate(cat)">Delete</button>
-                            </td>
-                        </tr>
-                    </table>
-                    <dir-pagination-controls template-url="App/directives/pagination/dirPagination.tpl.html" pagination-id="cat"></dir-pagination-controls>
-                </div>
-            </div>
-        </div>
-    </div>
     </div>
